@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.security.RolesAllowed;
 import java.security.Principal;
 
+/*
+If you start to use this project as the foundation for a real project
+make sure to delete this file before you "hand anything in"
+ */
 
 @AllArgsConstructor
 @NoArgsConstructor
