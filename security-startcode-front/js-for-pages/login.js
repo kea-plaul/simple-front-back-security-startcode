@@ -1,19 +1,19 @@
 import { showPage } from "../utils.js"
-
+import { SERVER_URL } from "../settings.js"
 import { handleErrors, makeOptions } from "../fetchUtils.js"
 
 export function setupLoginHandlers() {
   document.getElementById("btn-login").onclick = login
 }
 
-async function login() {
-
+async function login(evt) {
+  evt.preventDefault()
   const credentials = {}
   credentials.username = document.getElementById("username").value
   credentials.password = document.getElementById("password").value
   const options = makeOptions("POST", credentials)
   try {
-    const response = await fetch("http://localhost:8080/api/auth/login", options)
+    const response = await fetch(SERVER_URL + "auth/login", options)
       .then(res => handleErrors(res))
 
     const token = response.token
