@@ -29,59 +29,60 @@ import javax.servlet.http.HttpServletResponse;
 )
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private final PersonRepository userRepository;
-    private final UserDetailsServiceImp userDetailsService;
-    private final JwtTokenFilter jwtTokenFilter;
+  private final PersonRepository userRepository;
+  private final UserDetailsServiceImp userDetailsService;
+  private final JwtTokenFilter jwtTokenFilter;
 
-    public SecurityConfig(PersonRepository userRepository, UserDetailsServiceImp userDetailsService, JwtTokenFilter jwtTokenFilter) {
-        this.userRepository = userRepository;
-        this.userDetailsService = userDetailsService;
-        this.jwtTokenFilter = jwtTokenFilter;
-    }
+  public SecurityConfig(PersonRepository userRepository, UserDetailsServiceImp userDetailsService, JwtTokenFilter jwtTokenFilter) {
+    this.userRepository = userRepository;
+    this.userDetailsService = userDetailsService;
+    this.jwtTokenFilter = jwtTokenFilter;
+  }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return UserWithPassword.getPasswordEncoder();
-    }
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    return UserWithPassword.getPasswordEncoder();
+  }
 
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService)
-                .passwordEncoder(passwordEncoder());
-    }
+  @Override
+  protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    auth.userDetailsService(userDetailsService)
+            .passwordEncoder(passwordEncoder());
+  }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        // Enable CORS and disable CSRF
-        http.cors().and().csrf().disable()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and();
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-                .exceptionHandling()
-                .authenticationEntryPoint(
-                        (request, response, ex) -> {
-                            response.sendError(
-                                    HttpServletResponse.SC_UNAUTHORIZED,
-                                    ex.getMessage()
-                            );
-                        }
-                )
-                .and()
-                .authorizeRequests()
-                .antMatchers("/api/auth/**").permitAll()
-                .antMatchers(HttpMethod.GET, "/api/message/all").permitAll()
-                .antMatchers(HttpMethod.GET, "/index.html").permitAll()
-                // All other endpoints are private
-                //.anyRequest().authenticated();
-                .anyRequest().permitAll();  //Disable Security
-        http.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
-    }
+  @Override
+  protected void configure(HttpSecurity http) throws Exception {
+    // Enable CORS and disable CSRF
+    http.cors().and().csrf().disable()
+            .sessionManagement()
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            .and();
+    http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+            .exceptionHandling()
+            .authenticationEntryPoint(
+                    (request, response, ex) -> {
+                      response.sendError(
+                              HttpServletResponse.SC_UNAUTHORIZED,
+                              ex.getMessage()
+                      );
+                    }
+            )
+            .and()
+            .authorizeRequests()
+            .antMatchers("/api/auth/**").permitAll()
+            .antMatchers("/error").permitAll()
+            .antMatchers(HttpMethod.GET, "/api/message/all").permitAll()
+            .antMatchers(HttpMethod.GET, "/index.html").permitAll()
+            // All other endpoints are private
+            .anyRequest().authenticated();
+    //.anyRequest().permitAll();  //Disable Security
+    http.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
+  }
 
-    @Override
-    @Bean
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
-    }
+  @Override
+  @Bean
+  public AuthenticationManager authenticationManagerBean() throws Exception {
+    return super.authenticationManagerBean();
+  }
 
 }
